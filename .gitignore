@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Database
+*.db
+
+# Node
+node_modules/
+build/
+
+# Env
+.env
+
+# VS Code / Visual Studio
+.vs/
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
