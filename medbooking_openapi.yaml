@@ -1,0 +1,620 @@
+openapi: 3.0.3
+info:
+  title: MedBooking API
+  version: 1.0.0
+  description: >
+    Documentazione OpenAPI delle API principali del sistema MedBooking.
+    Il file descrive gli endpoint dedicati ad autenticazione, prenotazioni,
+    gestione dei medici, disponibilità, ferie e funzionalità amministrative.
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Server locale di sviluppo
+
+tags:
+  - name: Auth
+    description: Autenticazione e registrazione utenti
+  - name: Doctors
+    description: Consultazione medici e slot disponibili
+  - name: Appointments
+    description: Gestione prenotazioni lato paziente e medico
+  - name: Admin
+    description: Funzionalità amministrative
+  - name: Availability
+    description: Gestione disponibilità e ferie dei medici
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [name, lastname, username, password]
+      properties:
+        name:
+          type: string
+          example: Chiara
+        lastname:
+          type: string
+          example: Liberatori
+        username:
+          type: string
+          example: chiara.lib
+        password:
+          type: string
+          example: "1234"
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: "1234"
+
+    DoctorLoginRequest:
+      type: object
+      required: [codDoc, password]
+      properties:
+        codDoc:
+          type: string
+          example: drRossi
+        password:
+          type: string
+          example: "1234"
+
+    AppointmentRequest:
+      type: object
+      required: [doctor_id, date]
+      properties:
+        doctor_id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          example: "2026-04-06 09:00"
+
+    CreateDoctorRequest:
+      type: object
+      required: [codDoc, name, specialization]
+      properties:
+        codDoc:
+          type: string
+          example: drNeri
+        name:
+          type: string
+          example: Neri Luca
+        specialization:
+          type: string
+          example: Neurologia
+
+    AvailabilityRequest:
+      type: object
+      required: [doctor_id, day, start, end]
+      properties:
+        doctor_id:
+          type: integer
+          example: 1
+        day:
+          type: integer
+          example: 0
+          description: 0 = lunedì, 6 = domenica
+        start:
+          type: string
+          example: "09:00"
+        end:
+          type: string
+          example: "12:00"
+
+    TimeoffRequest:
+      type: object
+      required: [doctor_id, start, end]
+      properties:
+        doctor_id:
+          type: integer
+          example: 1
+        start:
+          type: string
+          example: "2026-04-10"
+        end:
+          type: string
+          example: "2026-04-15"
+
+    MessageResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Operazione completata
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: jwt-token
+        role:
+          type: string
+          example: admin
+        nomeUtenza:
+          type: string
+          example: Admin
+        cognUtenza:
+          type: string
+          example: Admin
+
+    DoctorAuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: jwt-token
+        role:
+          type: string
+          example: doctor
+        name:
+          type: string
+          example: Rossi Mario
+
+    DoctorItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Rossi Mario
+        specialization:
+          type: string
+          example: Cardiologia
+
+    PatientAppointment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          example: "2026-04-06 09:00"
+        doctor_name:
+          type: string
+          example: Rossi Mario
+        specialization:
+          type: string
+          example: Cardiologia
+
+    DoctorAppointment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          example: "2026-04-06 09:00"
+        patient:
+          type: string
+          example: Mario Rossi
+
+    AdminAppointment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          example: "2026-04-06 09:00"
+        doctor:
+          type: string
+          example: Rossi Mario
+        patient:
+          type: string
+          example: Mario Rossi
+
+    UserItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Mario
+        lastname:
+          type: string
+          example: Rossi
+        username:
+          type: string
+          example: mrossi
+        role:
+          type: string
+          example: patient
+
+    StatsResponse:
+      type: object
+      properties:
+        users:
+          type: integer
+          example: 12
+        doctors:
+          type: integer
+          example: 3
+        appointments:
+          type: integer
+          example: 18
+
+paths:
+  /register:
+    post:
+      tags: [Auth]
+      summary: Registrazione di un nuovo paziente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Utente registrato correttamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Username già esistente oppure dati mancanti
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Login di paziente o amministratore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticazione riuscita
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Dati mancanti
+        '401':
+          description: Credenziali errate
+
+  /doctor/login:
+    post:
+      tags: [Auth]
+      summary: Login del medico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorLoginRequest'
+      responses:
+        '200':
+          description: Autenticazione riuscita
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAuthResponse'
+        '400':
+          description: Dati mancanti
+        '401':
+          description: Credenziali errate
+
+  /doctors:
+    get:
+      tags: [Doctors]
+      summary: Elenco dei medici registrati
+      responses:
+        '200':
+          description: Lista medici
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorItem'
+
+  /doctor/{doctor_id}/slots:
+    get:
+      tags: [Doctors]
+      summary: Restituisce gli slot disponibili per un medico
+      parameters:
+        - name: doctor_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "2026-04-06"
+      responses:
+        '200':
+          description: Lista degli slot disponibili
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "2026-04-06 09:00"
+        '400':
+          description: Parametro date mancante
+
+  /appointments:
+    post:
+      tags: [Appointments]
+      summary: Creazione di una prenotazione lato paziente
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+      responses:
+        '201':
+          description: Prenotazione creata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Slot occupato
+        '403':
+          description: Utente non autorizzato
+
+    get:
+      tags: [Appointments]
+      summary: Elenco prenotazioni del paziente autenticato
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista prenotazioni paziente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientAppointment'
+        '403':
+          description: Utente non autorizzato
+
+  /appointments/{appointment_id}:
+    delete:
+      tags: [Appointments]
+      summary: Eliminazione di un appuntamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Appuntamento eliminato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '403':
+          description: Utente non autorizzato
+        '404':
+          description: Appuntamento non trovato
+
+  /doctor/appointments:
+    get:
+      tags: [Appointments]
+      summary: Elenco appuntamenti del medico autenticato
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista appuntamenti medico
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorAppointment'
+
+  /admin/stats:
+    get:
+      tags: [Admin]
+      summary: Statistiche generali del sistema
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistiche complessive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: Elenco utenti registrati
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista utenti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserItem'
+
+  /admin/doctors:
+    get:
+      tags: [Admin]
+      summary: Elenco dei medici lato amministratore
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista medici
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorItem'
+
+    post:
+      tags: [Admin]
+      summary: Creazione di un nuovo medico
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDoctorRequest'
+      responses:
+        '201':
+          description: Medico creato correttamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Dati mancanti oppure codice già esistente
+
+  /admin/appointments:
+    get:
+      tags: [Admin]
+      summary: Elenco completo degli appuntamenti
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista appuntamenti completa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminAppointment'
+
+  /admin/doctors/summary:
+    get:
+      tags: [Admin]
+      summary: Riepilogo medici con disponibilità e ferie
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Riepilogo completo dei medici
+
+  /admin/availability:
+    post:
+      tags: [Availability]
+      summary: Inserimento disponibilità di un medico
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRequest'
+      responses:
+        '201':
+          description: Disponibilità salvata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /admin/availability/{availability_id}:
+    delete:
+      tags: [Availability]
+      summary: Eliminazione di una disponibilità
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: availability_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Disponibilità eliminata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Disponibilità non trovata
+
+  /admin/timeoff:
+    post:
+      tags: [Availability]
+      summary: Inserimento periodo di ferie o indisponibilità
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeoffRequest'
+      responses:
+        '201':
+          description: Periodo di indisponibilità salvato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /admin/timeoff/{timeoff_id}:
+    delete:
+      tags: [Availability]
+      summary: Eliminazione di un periodo di ferie o indisponibilità
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: timeoff_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Periodo eliminato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Periodo non trovato
