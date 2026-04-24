@@ -1,14 +1,16 @@
 # Python
 __pycache__/
 *.pyc
-*.pyo
-
+venv/
+.env
+instance/
+ 
 # Database
 *.db
 
 # Node
 node_modules/
-build/
+frontend/build/
 
 # Env
 .env
@@ -19,7 +21,12 @@ build/
 
 # OS
 .DS_Store
+Thumbs.db
 
 # Logs
 *.log
 
+# IDE
+.vs/
+.vscode/
+ 
