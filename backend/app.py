@@ -12,13 +12,13 @@ from functools import wraps
 from models import db, User, Doctor, Appointment, Availability, TimeOff
 from datetime import datetime, timedelta
 import os
-
+from dotenv import load_dotenv
 app = Flask(__name__)
 
 # CONFIG
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
-app.config['JWT_SECRET_KEY'] = 'SC_RE_CL_MedBookingApp_12345_SUPER_SECRET_KEY_56789'
+app.config['JWT_SECRET_KEY'] =os.getenv("JWT_SECRET_KEY", "dev-secret-key")  #''
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # INIT
