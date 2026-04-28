@@ -52,4 +52,8 @@ Le API seguono i principi REST e gestiscono:
 - Disponibilità e ferie
 - Funzionalità amministrative
 
-📄 È disponibile anche la documentazione in formato OpenAPI:
+Il file di documentazione API è disponibile nella root del progetto:
+
+`medbooking_openapi.yaml`
+
+Può essere aperto tramite Swagger Editor o altri strumenti compatibili con OpenAPI.

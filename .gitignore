@@ -1,32 +1,52 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 venv/
 .env
 instance/
- 
-# Database
-*.db
 
-# Node
+# =========================
+# Database
+# =========================
+*.db
+*.sqlite3
+
+# =========================
+# Node / Frontend
+# =========================
 node_modules/
 frontend/build/
 
-# Env
+# =========================
+# Environment variables
+# =========================
 .env
+.env.local
+.env.*.local
 
-# VS Code / Visual Studio
+# =========================
+# IDE / Editor
+# =========================
 .vs/
 .vscode/
 
-# OS
+# =========================
+# OS files
+# =========================
 .DS_Store
 Thumbs.db
 
+# =========================
 # Logs
+# =========================
 *.log
 
-# IDE
-.vs/
-.vscode/
- 
+# =========================
+# Misc (consigliati)
+# =========================
+*.swp
+*.tmp
