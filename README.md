@@ -57,3 +57,15 @@ Il file di documentazione API è disponibile nella root del progetto:
 `medbooking_openapi.yaml`
 
 Può essere aperto tramite Swagger Editor o altri strumenti compatibili con OpenAPI.
+
+## Avvio del progetto
+
+### Backend
+cd backend
+pip install -r requirements.txt
+python app.py
+
+### Frontend
+cd frontend
+npm install
+npm start
